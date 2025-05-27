@@ -1,6 +1,39 @@
 import { prisma } from '../../db/config';
-import { analyzeMessages } from '../ai/anthropic';
+import { analyzeMessages, askQuestion } from '../ai/anthropic';
 import { sendMessage } from './api';
+
+export const handleAskQuestion = async ({
+    question,
+    address,
+}: {
+    question: string;
+    address: string;
+}) => {
+    console.log('Question asked:', question);
+
+    try {
+        // Send a processing message
+        await sendMessage({
+            address,
+            message: 'Thinking about your question... One moment please.',
+        });
+
+        // Get answer from Claude
+        const answer = await askQuestion(question);
+
+        // Send the answer back as an iMessage
+        await sendMessage({
+            address,
+            message: answer,
+        });
+    } catch (error) {
+        console.error('Error in handleAskQuestion:', error);
+        await sendMessage({
+            address,
+            message: 'Sorry, I encountered an error while processing your question.',
+        });
+    }
+};
 
 export const handleAnalyzeMessage = async ({
     message,

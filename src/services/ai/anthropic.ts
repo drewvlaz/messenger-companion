@@ -6,6 +6,33 @@ const client = new Anthropic({
     apiKey: process.env['ANTHROPIC_API_KEY'], // This is the default and can be omitted
 });
 
+export const askQuestion = async (question: string): Promise<string> => {
+    try {
+        // Read system prompt
+        const systemPromptPath = path.join(__dirname, 'systemPrompt.txt');
+        const systemPrompt = fs.existsSync(systemPromptPath)
+            ? fs.readFileSync(systemPromptPath, 'utf-8')
+            : 'You are a helpful assistant. DO NOT USE ANY MARKDOWN.';
+
+        const response = await client.messages.create({
+            max_tokens: 1024,
+            system: systemPrompt,
+            messages: [
+                {
+                    role: 'user',
+                    content: question,
+                },
+            ],
+            model: 'claude-3-7-sonnet-latest',
+        });
+
+        return response.content[0].type === 'text' ? response.content[0].text : '';
+    } catch (error) {
+        console.error('Error asking question to Claude:', error);
+        return 'Sorry, I encountered an error while processing your question.';
+    }
+};
+
 export const analyzeMessages = async (
     messages: { text: string; timestamp: Date }[],
 ): Promise<string> => {

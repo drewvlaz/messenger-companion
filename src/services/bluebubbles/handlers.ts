@@ -5,7 +5,7 @@ import { BBReceivedMessage } from '../../interface/bluebubble.types';
 import { MessageCommandType } from './types';
 import { sendMessage } from './api';
 import { prisma } from '../../db/config';
-import { handleAnalyzeMessage } from './actions';
+import { handleAnalyzeMessage, handleAskQuestion } from './actions';
 
 const parseCommand = (message: string) => {
     const [command, ...args] = message.split(' ');
@@ -47,10 +47,7 @@ const handleCommand = async ({
         case MessageCommandType.ASK:
             console.log('Asking:', args);
             // Process the ASK command here
-            await sendMessage({
-                address,
-                message: `Request processed successfully: "${args}"`,
-            });
+            await handleAskQuestion({ question: args, address });
             break;
         case MessageCommandType.ANALYZE:
             await handleAnalyzeMessage({ message: args, address });
