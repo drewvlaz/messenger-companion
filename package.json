@@ -26,9 +26,11 @@
   },
   "homepage": "https://github.com/drewvlaz/messenger-companion#readme",
   "dependencies": {
+    "axios": "^1.9.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "prisma": "^6.8.2"
+    "prisma": "^6.8.2",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",

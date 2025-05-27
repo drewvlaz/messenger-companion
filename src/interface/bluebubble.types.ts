@@ -3,9 +3,9 @@ export enum BBEventType {
     // TODO: add more event types
 }
 
-type BBEventData = BBMessage;
+type BBEventData = BBReceivedMessage;
 
-export type BBMessage = {
+export type BBReceivedMessage = {
     originalROWID: number;
     guid: string;
     text: string;
@@ -44,6 +44,29 @@ export type BBMessage = {
     dateEdited: string | null;
     dateRetracted: string | null;
     partCount: number;
+};
+
+export enum BBSentMessageMethod {
+    APPLE_SCRIPT = 'apple-script',
+    PRIVATE_API = 'private-api',
+}
+
+export type BBSentMessage = {
+    // "chatGuid": "iMessage;+;xxxxxxxxxxxx",
+    // "tempGuid": "",
+    // "message": "Hello World!",
+    // "method": "apple-script",
+    // "subject": "",
+    // "effectId": "",
+    // "selectedMessageGuid": ""
+    chatGuid: string;
+    tempGuid: string;
+    message: string;
+    method: BBSentMessageMethod;
+    subject: string;
+    effectId: string;
+    selectedMessageGuid: string;
+    partIndex: number;
 };
 
 export type BBEvent = {

@@ -25,7 +25,15 @@ const parseCommand = (message: string) => {
     }
 };
 
-const handleCommand = async ({ type, args, address }: { type: MessageCommandType; args: string; address: string }) => {
+const handleCommand = async ({
+    type,
+    args,
+    address,
+}: {
+    type: MessageCommandType;
+    args: string;
+    address: string;
+}) => {
     switch (type) {
         case MessageCommandType.ASK:
             console.log('Asking:', args);
@@ -45,29 +53,21 @@ const handleCommand = async ({ type, args, address }: { type: MessageCommandType
 };
 
 export const handleNewMessage = async (message: BBReceivedMessage) => {
-    console.log('New message from:', message.handle.address);
-    console.log(message.text);
+    console.log(`New message from ${message.handle.address}: ${message.text}`);
 
     const command = parseCommand(message.text);
-    
+
     switch (message.handle.address) {
         // TODO: stop hardcoding these
+        case config.env.JESSE_ADDRESS:
         case config.env.SELF_ADDRESS: {
-            console.log(command);
-            console.log('New message from self');
             if (command) {
                 await handleCommand({ ...command, address: message.handle.address });
             }
             break;
         }
-        case config.env.JESSE_ADDRESS:
-            console.log('New message from Jesse');
-            if (command) {
-                await handleCommand({ ...command, address: message.handle.address });
-            }
-            break;
         default:
-            console.log('New message from unknown address');
+            console.log(`Unrecognized address: ${message.handle.address}. Skipping.`);
             return false;
     }
 
