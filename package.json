@@ -2,12 +2,17 @@
   "name": "messenger-companion",
   "version": "1.0.0",
   "description": "",
+  "private": true,
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "start": "node --trace-warnings src/app.ts",
-    "dev": "nodemon src/app.ts",
+    "buildd": "prisma generate && npx tsc",
+    "build": "npx tsc",
+    "start": "node --trace-warnings dist/index.js",
+    "dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "schema": "db/schema.prisma"
   },
   "repository": {
     "type": "git",

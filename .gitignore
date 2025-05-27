@@ -2,3 +2,5 @@ node_modules/*
 
 *.local.json
 .aider*
+
+*.tsbuildinfo

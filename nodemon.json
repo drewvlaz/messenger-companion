@@ -1,0 +1,7 @@
+{
+    "watch": ["src"],
+    "ext": "ts,json,js",
+    "exec": "yarn run build && yarn run start",
+    "legacyWatchComments": "This helps make file change detection work in Docker. See https://github.com/remy/nodemon/issues/3068",
+    "legacyWatch": true
+}
