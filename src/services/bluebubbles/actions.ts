@@ -10,7 +10,7 @@ export const handleAnalyzeMessage = async ({
     address: string;
 }) => {
     console.log('Analyzing:', message);
-    
+
     try {
         // Fetch previous messages from this sender
         const previousMessages = await prisma.bbMessage.findMany({
@@ -18,12 +18,13 @@ export const handleAnalyzeMessage = async ({
                 senderId: address,
             },
             orderBy: {
-                timestamp: 'asc',
+                dateCreated: 'desc',
             },
             select: {
                 text: true,
-                timestamp: true,
+                dateCreated: true,
             },
+            take: 10,
         });
 
         if (previousMessages.length === 0) {
@@ -37,22 +38,27 @@ export const handleAnalyzeMessage = async ({
         // Send a processing message
         await sendMessage({
             address,
-            message: "Analyzing your message history... This may take a moment.",
+            message: 'Analyzing your message history... This may take a moment.',
         });
 
         // Get analysis from Claude
-        const analysis = await analyzeMessages(previousMessages);
+        const analysis = await analyzeMessages(
+            previousMessages.map((msg) => ({
+                text: msg.text,
+                timestamp: msg.dateCreated,
+            })),
+        );
 
         // Send the analysis back as an iMessage
         await sendMessage({
             address,
-            message: `📊 Message Analysis:\n\n${analysis}`,
+            message: `Message Analysis:\n\n${analysis}`,
         });
     } catch (error) {
         console.error('Error in handleAnalyzeMessage:', error);
         await sendMessage({
             address,
-            message: "Sorry, I encountered an error while analyzing your messages.",
+            message: 'Sorry, I encountered an error while analyzing your messages.',
         });
     }
 };
