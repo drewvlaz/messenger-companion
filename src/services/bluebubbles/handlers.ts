@@ -60,12 +60,16 @@ const recordMessage = async (message: BBReceivedMessage) => {
     const recipientId = message.isFromMe ? message.handle.address : config.env.SELF_ADDRESS!;
     await prisma.bbMessage.create({
         data: {
+            // Identifiers
             messageId: message.guid,
             senderId,
             recipientId,
+
+            // Message content
             subject: message.subject,
             text: message.text,
 
+            // Date metadata
             dateCreated: DateTime.fromMillis(message.dateCreated).toISO()!,
             dateDelivered: message.dateDelivered
                 ? DateTime.fromMillis(message.dateDelivered).toISO()!

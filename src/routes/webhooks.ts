@@ -5,6 +5,8 @@ import { handleNewMessage } from '../services/bluebubbles/handlers';
 const webhooks = express.Router();
 
 webhooks.post('/bluebubbles', (req: Request, res: Response) => {
+    console.log('Received bluebubbles event: ', req.body);
+
     const { type, data } = req.body as BBEvent;
     switch (type) {
         case BBEventType.NEW_MESSAGE:
