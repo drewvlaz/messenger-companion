@@ -5,6 +5,7 @@ import { BBReceivedMessage } from '../../interface/bluebubble.types';
 import { MessageCommandType } from './types';
 import { sendMessage } from './api';
 import { prisma } from '../../db/config';
+import { handleAnalyzeMessage } from './actions';
 
 const parseCommand = (message: string) => {
     const [command, ...args] = message.split(' ');
@@ -21,6 +22,11 @@ const parseCommand = (message: string) => {
         case '/ask':
             return {
                 type: MessageCommandType.ASK,
+                args: args.join(' '),
+            };
+        case '/analyze':
+            return {
+                type: MessageCommandType.ANALYZE,
                 args: args.join(' '),
             };
         default:
@@ -45,6 +51,9 @@ const handleCommand = async ({
                 address,
                 message: `Request processed successfully: "${args}"`,
             });
+            break;
+        case MessageCommandType.ANALYZE:
+            await handleAnalyzeMessage({ message: args, address });
             break;
         default:
             console.log('Unknown command:', type);
