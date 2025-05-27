@@ -10,13 +10,15 @@ export type BBReceivedMessage = {
     guid: string;
     text: string;
     attributedBody: string | null;
-    handle: {
-        originalROWID: number;
-        address: string;
-        service: string;
-        uncanonicalizedId: string | null;
-        country: string;
-    };
+    handle:
+        | {
+              originalROWID: number;
+              address: string;
+              service: string;
+              uncanonicalizedId: string | null;
+              country: string;
+          }
+        | undefined;
     handleId: number;
     otherHandle: number;
     attachments: [];

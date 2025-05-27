@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { ok } from 'assert';
 
 import { config } from '../../config';
 import { BBReceivedMessage } from '../../interface/bluebubble.types';
@@ -62,8 +63,9 @@ const handleCommand = async ({
 };
 
 const recordMessage = async (message: BBReceivedMessage) => {
-    const senderId = message.isFromMe ? config.env.SELF_ADDRESS! : message.handle.address;
-    const recipientId = message.isFromMe ? message.handle.address : config.env.SELF_ADDRESS!;
+    const senderId = message.isFromMe ? config.env.SELF_ADDRESS! : message.handle?.address;
+    const recipientId = message.isFromMe ? message.handle?.address : config.env.SELF_ADDRESS!;
+    ok(senderId && recipientId);
     await prisma.bbMessage.create({
         data: {
             // Identifiers
@@ -91,6 +93,9 @@ const recordMessage = async (message: BBReceivedMessage) => {
 };
 
 export const handleNewMessage = async (message: BBReceivedMessage) => {
+    if (!message.handle) {
+        return;
+    }
     await recordMessage(message);
 
     console.log(`New message from ${message.handle.address}: ${message.text}`);
