@@ -1,7 +1,10 @@
+import { DateTime } from 'luxon';
+
 import { config } from '../../config';
 import { BBReceivedMessage } from '../../interface/bluebubble.types';
 import { MessageCommandType } from './types';
 import { sendMessage } from './api';
+import { prisma } from '../../db/config';
 
 const parseCommand = (message: string) => {
     const [command, ...args] = message.split(' ');
@@ -52,7 +55,34 @@ const handleCommand = async ({
     }
 };
 
+const recordMessage = async (message: BBReceivedMessage) => {
+    const senderId = message.isFromMe ? config.env.SELF_ADDRESS! : message.handle.address;
+    const recipientId = message.isFromMe ? message.handle.address : config.env.SELF_ADDRESS!;
+    await prisma.bbMessage.create({
+        data: {
+            messageId: message.guid,
+            senderId,
+            recipientId,
+            subject: message.subject,
+            text: message.text,
+
+            dateCreated: DateTime.fromMillis(message.dateCreated).toISO()!,
+            dateDelivered: message.dateDelivered
+                ? DateTime.fromMillis(message.dateDelivered).toISO()!
+                : null,
+            dateEdited: message.dateEdited
+                ? DateTime.fromMillis(message.dateEdited).toISO()!
+                : null,
+            dateRetracted: message.dateRetracted
+                ? DateTime.fromMillis(message.dateRetracted).toISO()!
+                : null,
+        },
+    });
+};
+
 export const handleNewMessage = async (message: BBReceivedMessage) => {
+    await recordMessage(message);
+
     console.log(`New message from ${message.handle.address}: ${message.text}`);
 
     const command = parseCommand(message.text);

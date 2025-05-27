@@ -5,14 +5,13 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "buildd": "prisma generate && npx tsc",
-    "build": "npx tsc",
+    "build": "prisma generate && npx tsc",
     "start": "node --trace-warnings dist/index.js",
     "dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "prisma": {
-    "schema": "db/schema.prisma"
+    "schema": "src/db/schema.prisma"
   },
   "repository": {
     "type": "git",
@@ -26,15 +25,18 @@
   },
   "homepage": "https://github.com/drewvlaz/messenger-companion#readme",
   "dependencies": {
+    "@prisma/client": "6.8.2",
     "axios": "^1.9.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "luxon": "^3.6.1",
     "prisma": "^6.8.2",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/express": "^5.0.2",
+    "@types/luxon": "^3.6.2",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

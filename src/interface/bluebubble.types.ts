@@ -23,8 +23,10 @@ export type BBReceivedMessage = {
     subject: string | null;
     error: number;
     dateCreated: number;
-    dateRead: string | null;
-    dateDelivered: string | null;
+    dateRead: number | null;
+    dateDelivered: number | null;
+    dateEdited: number | null;
+    dateRetracted: number | null;
     isDelivered: boolean;
     isFromMe: boolean;
     hasDdResults: boolean;
@@ -41,8 +43,6 @@ export type BBReceivedMessage = {
     chats: [[Object]];
     messageSummaryInfo: string | null;
     payloadData: string | null;
-    dateEdited: string | null;
-    dateRetracted: string | null;
     partCount: number;
 };
 

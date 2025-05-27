@@ -1,0 +1,25 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model BbMessage {
+  id          String @id @default(uuid())
+  messageId   String
+  senderId    String
+  recipientId String
+  text        String
+  subject     String?
+
+  dateCreated   DateTime
+  dateDelivered DateTime?
+  dateEdited    DateTime?
+  dateRetracted DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
