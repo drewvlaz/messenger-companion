@@ -1,8 +1,10 @@
 node_modules/*
+dist/*
+
+.env*
 
 *.local.json
 .aider*
 
 *.tsbuildinfo
 
-dist/*

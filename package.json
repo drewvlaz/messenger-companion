@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/drewvlaz/messenger-companion#readme",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "prisma": "^6.8.2"
   },
