@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { DateTime } from 'luxon';
+
 import { ok } from 'assert';
 import { prisma } from '../../db/config';
 import { config } from '../../config';
@@ -44,6 +45,8 @@ const captureMessage = async (message: BBMessageResponse) => {
     });
 };
 
+// TODO: maybe move this back to the service -- not sufficiently general enough
+// to be middleware
 export const captureMessageMiddleware = () => {
     const middlewarFn = async (req: Request, _res: Response, next: NextFunction) => {
         // TODO: maybe use zod to parse?
