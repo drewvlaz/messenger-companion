@@ -12,6 +12,26 @@ const client = new Anthropic({
     apiKey: process.env['ANTHROPIC_API_KEY'], // This is the default and can be omitted
 });
 
+// Analysis types
+export enum AnalysisType {
+    BASIC = 'basic',
+    STANDARD = 'standard',
+    DETAILED = 'detailed',
+}
+
+// Model selection based on analysis complexity
+const getModelForAnalysisType = (type: AnalysisType): string => {
+    switch (type) {
+        case AnalysisType.BASIC:
+            return 'claude-3-5-sonnet-latest'; // Use 3.5 for basic analysis (faster, cheaper)
+        case AnalysisType.DETAILED:
+            return 'claude-3-7-opus-latest'; // Use 3.7 Opus for detailed analysis (more powerful)
+        case AnalysisType.STANDARD:
+        default:
+            return 'claude-3-7-sonnet-latest'; // Use 3.7 Sonnet for standard analysis
+    }
+};
+
 /**
  * Sends a question to Claude AI and returns the response.
  *
@@ -55,43 +75,94 @@ export const askQuestion = async (question: string): Promise<string> => {
 /**
  * Analyzes a collection of messages using Claude AI and provides insights.
  *
- * Uses the analyzeMessagesPrompt.txt file for system instructions if available,
+ * Uses the appropriate prompt file for system instructions based on analysis type,
  * or falls back to a default prompt if the file doesn't exist.
  *
- * @param messages - Array of message objects containing text and timestamp
+ * @param messages - Array of message objects containing text, timestamp, and author
+ * @param type - Type of analysis to perform (basic, standard, detailed)
  * @returns A string containing Claude's analysis or an error message
  */
 export const analyzeMessages = async (
-    messages: { text: string; timestamp: Date }[],
+    messages: { text: string; timestamp: Date; author?: string }[],
+    type: AnalysisType = AnalysisType.STANDARD,
 ): Promise<string> => {
     try {
-        // Read system prompt for analyzeMessages
-        const systemPromptPath = path.join(__dirname, 'prompts', 'analyzeMessagesPrompt.txt');
-        const systemPrompt = fs.existsSync(systemPromptPath)
-            ? fs.readFileSync(systemPromptPath, 'utf-8')
-            : squish`
-                You are an assistant that analyzes message patterns and provides insights.
-                Identify communication patterns, topics, and sentiment.
-                DO NOT USE ANY MARKDOWN.
-            `;
+        // Select prompt file based on analysis type
+        let promptFileName: string;
+        switch (type) {
+            case AnalysisType.BASIC:
+                promptFileName = 'basicAnalysisPrompt.txt';
+                break;
+            case AnalysisType.DETAILED:
+                promptFileName = 'detailedAnalysisPrompt.txt';
+                break;
+            case AnalysisType.STANDARD:
+            default:
+                promptFileName = 'analyzeMessagesPrompt.txt';
+                break;
+        }
 
-        // Format messages for Claude
+        // Read system prompt for the selected analysis type
+        const systemPromptPath = path.join(__dirname, 'prompts', promptFileName);
+        let systemPrompt: string;
+
+        if (fs.existsSync(systemPromptPath)) {
+            systemPrompt = fs.readFileSync(systemPromptPath, 'utf-8');
+        } else {
+            // Fallback prompts if files don't exist
+            switch (type) {
+                case AnalysisType.BASIC:
+                    systemPrompt = squish`
+                        You are an assistant that performs quick, basic analysis of conversations.
+                        Focus on main topics and overall tone only.
+                        Keep your response very brief (2-3 paragraphs maximum).
+                        DO NOT USE ANY MARKDOWN.
+                    `;
+                    break;
+                case AnalysisType.DETAILED:
+                    systemPrompt = squish`
+                        You are an expert conversation analyst providing in-depth insights.
+                        Analyze communication patterns, themes, emotional undertones, and language patterns.
+                        Be thorough and provide specific examples from the conversation.
+                        DO NOT USE ANY MARKDOWN.
+                    `;
+                    break;
+                default:
+                    systemPrompt = squish`
+                        You are an assistant that analyzes message patterns and provides insights.
+                        Identify communication patterns, topics, and sentiment.
+                        DO NOT USE ANY MARKDOWN.
+                    `;
+            }
+        }
+
+        // Format messages for Claude, including author information
         const formattedMessages = messages
-            .map((msg) => `[${msg.timestamp.toISOString()}] ${msg.text}`)
+            .map((msg) => {
+                const authorInfo = msg.author ? `[Author: ${msg.author}]` : '';
+                return `[${msg.timestamp.toISOString()}] ${authorInfo} ${msg.text}`;
+            })
             .join('\n');
 
+        // Select appropriate model based on analysis type
+        const model = getModelForAnalysisType(type);
+
+        // Adjust token limit based on analysis type
+        const maxTokens = type === AnalysisType.DETAILED ? 2048 : 1024;
+
         const response = await client.messages.create({
-            max_tokens: 1024,
+            max_tokens: maxTokens,
             system: systemPrompt,
             messages: [
                 {
                     role: 'user',
                     content: squish`
                         Please analyze these messages and provide insights about:
-                        - Communication patterns
+                        - Communication patterns between participants
                         - Topics discussed
                         - Overall sentiment
-                        - Any notable observations
+                        - Any notable observations about individual communication styles
+                        - Interaction dynamics between participants
 
                         Messages:
                         ${formattedMessages}
@@ -100,7 +171,7 @@ export const analyzeMessages = async (
                     `,
                 },
             ],
-            model: 'claude-3-7-sonnet-latest',
+            model: model,
         });
 
         return response.content[0].type === 'text' ? response.content[0].text : '';

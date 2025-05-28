@@ -1,5 +1,5 @@
 import { prisma } from '../../db/config';
-import { analyzeMessages, askQuestion } from '../ai/anthropic';
+import { AnalysisType, analyzeMessages, askQuestion } from '../ai/anthropic';
 import { sendMessage } from './api';
 
 export const handleAskQuestion = async ({
@@ -39,12 +39,14 @@ export const handleAnalyzeMessage = async ({
     message,
     senderAddress,
     recipientAddress,
+    analysisType = AnalysisType.STANDARD,
 }: {
     message: string;
     senderAddress: string;
     recipientAddress: string;
+    analysisType?: AnalysisType;
 }) => {
-    console.log('Analyzing:', message);
+    console.log(`Analyzing (${analysisType}):`, message);
 
     try {
         // Fetch previous messages from the chat between sender and recipient
@@ -88,18 +90,21 @@ export const handleAnalyzeMessage = async ({
             message: 'Analyzing your message history... This may take a moment.',
         });
 
-        // Get analysis from Claude
+        // Get analysis from Claude with author information
         const analysis = await analyzeMessages(
             previousMessages.map((msg) => ({
                 text: msg.text,
                 timestamp: msg.dateCreated,
+                author: msg.senderId === senderAddress ? 'User' : 'Assistant',
             })),
+            analysisType,
         );
 
-        // Send the analysis back as an iMessage
+        // Send the analysis back as an iMessage with type indicator
+        const analysisTypeLabel = analysisType.charAt(0).toUpperCase() + analysisType.slice(1);
         await sendMessage({
             address: senderAddress,
-            message: `Message Analysis:\n\n${analysis}`,
+            message: `${analysisTypeLabel} Message Analysis:\n\n${analysis}`,
         });
     } catch (error) {
         console.error('Error in handleAnalyzeMessage:', error);
