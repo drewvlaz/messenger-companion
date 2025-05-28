@@ -4,6 +4,46 @@ import fs from 'fs';
 import path from 'path';
 import { squish } from '../../utils/strings';
 
+// Simple in-memory store for conversation context
+// Maps user address to their latest analysis result
+const conversationContextStore: Map<
+    string,
+    {
+        analysisResult: string;
+        analyzedMessages: { text: string; timestamp: Date; author?: string }[];
+        timestamp: Date;
+    }
+> = new Map();
+
+/**
+ * Stores analysis context for a user to enable follow-up questions
+ *
+ * @param userAddress - The user's address/identifier
+ * @param analysisResult - The result of the analysis
+ * @param analyzedMessages - The messages that were analyzed
+ */
+export const storeAnalysisContext = (
+    userAddress: string,
+    analysisResult: string,
+    analyzedMessages: { text: string; timestamp: Date; author?: string }[],
+): void => {
+    conversationContextStore.set(userAddress, {
+        analysisResult,
+        analyzedMessages,
+        timestamp: new Date(),
+    });
+};
+
+/**
+ * Retrieves the stored analysis context for a user
+ *
+ * @param userAddress - The user's address/identifier
+ * @returns The stored analysis context or undefined if none exists
+ */
+export const getAnalysisContext = (userAddress: string) => {
+    return conversationContextStore.get(userAddress);
+};
+
 /**
  * Anthropic Claude API client instance.
  * Uses the API key from environment variables.
@@ -95,11 +135,13 @@ const getModelForAnalysisType = (type: AnalysisType): string => {
  *
  * Uses the askQuestionPrompt.txt file for system instructions if available,
  * or falls back to a default prompt if the file doesn't exist.
+ * If previous analysis context exists, it will be included to provide continuity.
  *
  * @param question - The user's question to be answered by Claude
+ * @param userAddress - The user's address to retrieve context (optional)
  * @returns A string containing Claude's response or an error message
  */
-export const askQuestion = async (question: string): Promise<string> => {
+export const askQuestion = async (question: string, userAddress?: string): Promise<string> => {
     try {
         // Read system prompt for askQuestion
         const systemPromptPath = path.join(__dirname, 'prompts', 'askQuestionPrompt.txt');
@@ -111,15 +153,45 @@ export const askQuestion = async (question: string): Promise<string> => {
                 DO NOT USE ANY MARKDOWN.
             `;
 
+        // Check if we have previous analysis context for this user
+        const previousContext = userAddress ? getAnalysisContext(userAddress) : undefined;
+
+        // Prepare messages array
+        const messages = [];
+
+        // If we have previous context and it's less than 30 minutes old, include it
+        if (
+            previousContext &&
+            new Date().getTime() - previousContext.timestamp.getTime() < 30 * 60 * 1000
+        ) {
+            messages.push({
+                role: 'assistant' as const,
+                content: squish`
+                    I previously analyzed some messages for you. Here's a summary of that analysis:
+                    
+                    ${previousContext.analysisResult}
+                `,
+            });
+
+            messages.push({
+                role: 'user' as const,
+                content: squish`
+                    Based on the analysis you just provided, I have a follow-up question:
+                    ${question}
+                `,
+            });
+        } else {
+            // No context or context too old, just ask the question directly
+            messages.push({
+                role: 'user' as const,
+                content: question,
+            });
+        }
+
         const response = await client.messages.create({
             max_tokens: 1024,
             system: systemPrompt,
-            messages: [
-                {
-                    role: 'user',
-                    content: question,
-                },
-            ],
+            messages: messages,
             model: 'claude-3-7-sonnet-latest',
         });
 
