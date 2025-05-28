@@ -30,12 +30,10 @@ const handleCommand = async ({
     type,
     args,
     address,
-    recipientAddress,
 }: {
     type: MessageCommandType;
     args: string;
     address: string;
-    recipientAddress: string;
 }) => {
     try {
         switch (type) {
@@ -50,8 +48,7 @@ const handleCommand = async ({
                 console.log('Analyzing:', args);
                 await handleAnalyzeMessage({
                     message: args,
-                    senderAddress: address,
-                    recipientAddress,
+                    userAddress: address,
                 });
                 break;
             default:
@@ -79,8 +76,6 @@ export const handleNewMessage = async (message: BBMessageResponse) => {
     console.log(`New message from ${message.handle.address}: ${message.text}`);
 
     const command = parseCommand(message.text);
-    // Get the recipient address (usually the self address)
-    const recipientAddress = config.env.SELF_ADDRESS!;
 
     switch (message.handle.address) {
         // TODO: stop hardcoding these
@@ -90,7 +85,6 @@ export const handleNewMessage = async (message: BBMessageResponse) => {
                 await handleCommand({
                     ...command,
                     address: message.handle.address,
-                    recipientAddress,
                 });
             }
             break;
