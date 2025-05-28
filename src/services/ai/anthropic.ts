@@ -80,11 +80,13 @@ export const askQuestion = async (question: string): Promise<string> => {
  *
  * @param messages - Array of message objects containing text, timestamp, and author
  * @param type - Type of analysis to perform (basic, standard, detailed)
+ * @param contextMessage - Optional message providing additional context for analysis
  * @returns A string containing Claude's analysis or an error message
  */
 export const analyzeMessages = async (
     messages: { text: string; timestamp: Date; author?: string }[],
     type: AnalysisType = AnalysisType.STANDARD,
+    contextMessage?: string,
 ): Promise<string> => {
     try {
         // Select prompt file based on analysis type
@@ -164,10 +166,12 @@ export const analyzeMessages = async (
                         - Any notable observations about individual communication styles
                         - Interaction dynamics between participants
 
-                        Messages:
+                        ${contextMessage ? `User's analysis request: "${contextMessage}"` : ''}
+                        ${contextMessage ? '\n\n' : ''}Messages:
                         ${formattedMessages}
 
                         Do not use any markdown. Format your response in small paragraphs that are easy to read.
+                        ${contextMessage ? 'Pay special attention to the user\'s analysis request when providing insights.' : ''}
                     `,
                 },
             ],

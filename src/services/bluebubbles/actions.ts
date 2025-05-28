@@ -90,7 +90,7 @@ export const handleAnalyzeMessage = async ({
             message: 'Analyzing your message history... This may take a moment.',
         });
 
-        // Get analysis from Claude with author information
+        // Get analysis from Claude with author information and user context
         const analysis = await analyzeMessages(
             previousMessages.map((msg) => ({
                 text: msg.text,
@@ -98,6 +98,7 @@ export const handleAnalyzeMessage = async ({
                 author: msg.senderId === senderAddress ? 'User' : 'Assistant',
             })),
             analysisType,
+            message // Pass the user's message as context
         );
 
         // Send the analysis back as an iMessage with type indicator
