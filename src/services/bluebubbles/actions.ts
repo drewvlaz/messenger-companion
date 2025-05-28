@@ -98,7 +98,7 @@ export const handleAnalyzeMessage = async ({
                 author: msg.senderId === senderAddress ? 'User' : 'Assistant',
             })),
             analysisType,
-            message // Pass the user's message as context
+            message, // Pass the user's message as context
         );
 
         // Send the analysis back as an iMessage with type indicator

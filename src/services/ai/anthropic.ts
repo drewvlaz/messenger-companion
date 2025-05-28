@@ -171,7 +171,7 @@ export const analyzeMessages = async (
                         ${formattedMessages}
 
                         Do not use any markdown. Format your response in small paragraphs that are easy to read.
-                        ${contextMessage ? 'Pay special attention to the user\'s analysis request when providing insights.' : ''}
+                        ${contextMessage ? "Pay special attention to the user's analysis request when providing insights." : ''}
                     `,
                 },
             ],
