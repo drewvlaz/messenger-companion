@@ -8,7 +8,7 @@ import { asyncMiddlewareHandler } from './utils';
 import { BBMessageResponse } from '../../interface/bluebubble/raw.types';
 import { BBEvent } from '../../interface/bluebubble/internal.types';
 
-const captureMessage = async (message: BBMessageResponse) => {
+export const captureMessage = async (message: BBMessageResponse) => {
     // Determine message participants
     const selfAddress = config.env.SELF_ADDRESS;
     const contactAddress = message.handle?.address;

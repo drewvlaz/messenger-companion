@@ -1,5 +1,5 @@
 import { prisma } from '../../db/config';
-import { AnalysisType, analyzeMessages, askQuestion } from '../ai/anthropic';
+import { analyzeMessages, askQuestion, determineAnalysisType } from '../ai/anthropic';
 import { sendMessage } from './api';
 
 export const handleAskQuestion = async ({
@@ -24,13 +24,20 @@ export const handleAnalyzeMessage = async ({
     message,
     senderAddress,
     recipientAddress,
-    analysisType = AnalysisType.STANDARD,
 }: {
     message: string;
     senderAddress: string;
     recipientAddress: string;
-    analysisType?: AnalysisType;
 }) => {
+    // First, determine the appropriate analysis type based on the user's message
+    await sendMessage({
+        address: senderAddress,
+        message: 'Determining the appropriate level of analysis...',
+    });
+
+    const analysisType = await determineAnalysisType(message);
+    console.log(`Analysis type determined: ${analysisType} for message: "${message}"`);
+
     // Fetch previous messages from the chat between sender and recipient
     const previousMessages = await prisma.bbMessage.findMany({
         where: {

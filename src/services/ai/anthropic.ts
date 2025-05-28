@@ -19,6 +19,64 @@ export enum AnalysisType {
     DETAILED = 'detailed',
 }
 
+/**
+ * Determines the appropriate analysis type based on user input.
+ * Uses Claude to analyze the request and decide which level of analysis is needed.
+ *
+ * @param userInput - The user's message requesting analysis
+ * @returns The appropriate AnalysisType (BASIC, STANDARD, or DETAILED)
+ */
+export const determineAnalysisType = async (userInput: string): Promise<AnalysisType> => {
+    try {
+        // If input is very short or empty, default to STANDARD
+        if (!userInput || userInput.trim().length < 5) {
+            return AnalysisType.STANDARD;
+        }
+
+        const response = await client.messages.create({
+            max_tokens: 50,
+            system: squish`
+                You are an assistant that determines the appropriate level of message analysis.
+                Based on the user's request, determine if they need:
+                - BASIC analysis (quick overview, simple patterns)
+                - STANDARD analysis (moderate detail, main patterns and insights)
+                - DETAILED analysis (in-depth, comprehensive analysis with examples)
+                
+                Respond with ONLY ONE WORD: BASIC, STANDARD, or DETAILED.
+            `,
+            messages: [
+                {
+                    role: 'user',
+                    content: squish`
+                        Based on this analysis request, what level of detail should I provide?
+                        
+                        Request: "${userInput}"
+                        
+                        Respond with ONLY ONE WORD: BASIC, STANDARD, or DETAILED.
+                    `,
+                },
+            ],
+            model: 'claude-3-5-sonnet-latest', // Use the faster model for this decision
+        });
+
+        const result =
+            response.content[0].type === 'text'
+                ? response.content[0].text.trim().toUpperCase()
+                : '';
+
+        if (result.includes('BASIC')) {
+            return AnalysisType.BASIC;
+        } else if (result.includes('DETAILED')) {
+            return AnalysisType.DETAILED;
+        } else {
+            return AnalysisType.STANDARD; // Default to STANDARD for any other response
+        }
+    } catch (error) {
+        console.error('Error determining analysis type:', error);
+        return AnalysisType.STANDARD; // Default to STANDARD on error
+    }
+};
+
 // Model selection based on analysis complexity
 const getModelForAnalysisType = (type: AnalysisType): string => {
     switch (type) {

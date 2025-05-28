@@ -3,17 +3,12 @@ import { MessageCommandType } from './types';
 import { sendMessage } from './api';
 import { handleAnalyzeMessage, handleAskQuestion } from './actions';
 import { BBMessageResponse } from '../../interface/bluebubble/raw.types';
+import { captureMessage } from '../../routes/middleware/capture.middleware';
 
 const parseCommand = (message: string) => {
     const [command, ...args] = message.split(' ');
-
-    const isCommand = (message: string) => {
-        return message.startsWith('/');
-    };
-
-    if (!isCommand(command)) {
-        return null;
-    }
+    const isCommand = (message: string) => message.startsWith('/');
+    if (!isCommand(command)) return null;
 
     switch (command) {
         case '/ask':
@@ -42,28 +37,36 @@ const handleCommand = async ({
     address: string;
     recipientAddress: string;
 }) => {
-    switch (type) {
-        case MessageCommandType.ASK:
-            console.log('Asking:', args);
-            // Process the ASK command here
-            await handleAskQuestion({
-                question: args,
-                userAddress: address,
-            });
-            break;
-        case MessageCommandType.ANALYZE:
-            await handleAnalyzeMessage({
-                message: args,
-                senderAddress: address,
-                recipientAddress,
-            });
-            break;
-        default:
-            console.log('Unknown command:', type);
-            await sendMessage({
-                address,
-                message: 'Unknown command. Please try again.',
-            });
+    try {
+        switch (type) {
+            case MessageCommandType.ASK:
+                console.log('Asking:', args, address);
+                await handleAskQuestion({
+                    question: args,
+                    userAddress: address,
+                });
+                break;
+            case MessageCommandType.ANALYZE:
+                console.log('Analyzing:', args);
+                await handleAnalyzeMessage({
+                    message: args,
+                    senderAddress: address,
+                    recipientAddress,
+                });
+                break;
+            default:
+                console.log('Unknown command:', type);
+                await sendMessage({
+                    address,
+                    message: 'Unknown command. Please try again.',
+                });
+        }
+    } catch (error) {
+        console.error('Error in handleCommand:', error);
+        await sendMessage({
+            address,
+            message: 'Sorry, I encountered an error while processing your command.',
+        });
     }
 };
 
@@ -71,6 +74,7 @@ export const handleNewMessage = async (message: BBMessageResponse) => {
     if (!message.handle) {
         return;
     }
+    await captureMessage(message);
 
     console.log(`New message from ${message.handle.address}: ${message.text}`);
 
