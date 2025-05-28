@@ -4,11 +4,11 @@ import { sendMessage } from './api';
 
 export const handleAskQuestion = async ({
     question,
-    senderAddress,
+    userAddress,
     recipientAddress,
 }: {
     question: string;
-    senderAddress: string;
+    userAddress: string;
     recipientAddress: string;
 }) => {
     console.log('Question asked:', question);
@@ -16,7 +16,7 @@ export const handleAskQuestion = async ({
     try {
         // Send a processing message
         await sendMessage({
-            address: senderAddress,
+            address: userAddress,
             message: 'Thinking about your question... One moment please.',
         });
 
@@ -25,13 +25,13 @@ export const handleAskQuestion = async ({
 
         // Send the answer back as an iMessage
         await sendMessage({
-            address: senderAddress,
+            address: userAddress,
             message: answer,
         });
     } catch (error) {
         console.error('Error in handleAskQuestion:', error);
         await sendMessage({
-            address: senderAddress,
+            address: userAddress,
             message: 'Sorry, I encountered an error while processing your question.',
         });
     }

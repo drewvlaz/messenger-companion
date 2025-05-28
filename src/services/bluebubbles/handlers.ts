@@ -48,7 +48,7 @@ const handleCommand = async ({
             // Process the ASK command here
             await handleAskQuestion({
                 question: args,
-                senderAddress: address,
+                userAddress: address,
                 recipientAddress,
             });
             break;
