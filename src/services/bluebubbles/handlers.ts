@@ -35,19 +35,29 @@ const handleCommand = async ({
     type,
     args,
     address,
+    recipientAddress,
 }: {
     type: MessageCommandType;
     args: string;
     address: string;
+    recipientAddress: string;
 }) => {
     switch (type) {
         case MessageCommandType.ASK:
             console.log('Asking:', args);
             // Process the ASK command here
-            await handleAskQuestion({ question: args, address });
+            await handleAskQuestion({ 
+                question: args, 
+                senderAddress: address,
+                recipientAddress 
+            });
             break;
         case MessageCommandType.ANALYZE:
-            await handleAnalyzeMessage({ message: args, address });
+            await handleAnalyzeMessage({ 
+                message: args, 
+                senderAddress: address,
+                recipientAddress 
+            });
             break;
         default:
             console.log('Unknown command:', type);
@@ -66,13 +76,19 @@ export const handleNewMessage = async (message: BBMessageResponse) => {
     console.log(`New message from ${message.handle.address}: ${message.text}`);
 
     const command = parseCommand(message.text);
+    // Get the recipient address (usually the self address)
+    const recipientAddress = config.env.SELF_ADDRESS;
 
     switch (message.handle.address) {
         // TODO: stop hardcoding these
         case config.env.JESSE_ADDRESS:
         case config.env.SELF_ADDRESS: {
             if (command) {
-                await handleCommand({ ...command, address: message.handle.address });
+                await handleCommand({ 
+                    ...command, 
+                    address: message.handle.address,
+                    recipientAddress
+                });
             }
             break;
         }

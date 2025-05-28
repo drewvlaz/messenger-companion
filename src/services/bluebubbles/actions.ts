@@ -4,17 +4,19 @@ import { sendMessage } from './api';
 
 export const handleAskQuestion = async ({
     question,
-    address,
+    senderAddress,
+    recipientAddress,
 }: {
     question: string;
-    address: string;
+    senderAddress: string;
+    recipientAddress: string;
 }) => {
     console.log('Question asked:', question);
 
     try {
         // Send a processing message
         await sendMessage({
-            address,
+            address: senderAddress,
             message: 'Thinking about your question... One moment please.',
         });
 
@@ -23,7 +25,7 @@ export const handleAskQuestion = async ({
 
         // Send the answer back as an iMessage
         await sendMessage({
-            address,
+            address: senderAddress,
             message: answer,
         });
     } catch (error) {
@@ -37,18 +39,31 @@ export const handleAskQuestion = async ({
 
 export const handleAnalyzeMessage = async ({
     message,
-    address,
+    senderAddress,
+    recipientAddress,
 }: {
     message: string;
-    address: string;
+    senderAddress: string;
+    recipientAddress: string;
 }) => {
     console.log('Analyzing:', message);
 
     try {
-        // Fetch previous messages from this sender
+        // Fetch previous messages from the chat between sender and recipient
         const previousMessages = await prisma.bbMessage.findMany({
             where: {
-                senderId: address,
+                OR: [
+                    // Messages from sender to recipient
+                    {
+                        senderId: senderAddress,
+                        recipientId: recipientAddress,
+                    },
+                    // Messages from recipient to sender
+                    {
+                        senderId: recipientAddress,
+                        recipientId: senderAddress,
+                    }
+                ]
             },
             orderBy: {
                 dateCreated: 'desc',
@@ -56,13 +71,14 @@ export const handleAnalyzeMessage = async ({
             select: {
                 text: true,
                 dateCreated: true,
+                senderId: true,
             },
             take: 10,
         });
 
         if (previousMessages.length === 0) {
             await sendMessage({
-                address,
+                address: senderAddress,
                 message: "I don't have any previous messages to analyze.",
             });
             return;
@@ -70,7 +86,7 @@ export const handleAnalyzeMessage = async ({
 
         // Send a processing message
         await sendMessage({
-            address,
+            address: senderAddress,
             message: 'Analyzing your message history... This may take a moment.',
         });
 
@@ -84,7 +100,7 @@ export const handleAnalyzeMessage = async ({
 
         // Send the analysis back as an iMessage
         await sendMessage({
-            address,
+            address: senderAddress,
             message: `Message Analysis:\n\n${analysis}`,
         });
     } catch (error) {
