@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
-import { BBSentMessage, BBSentMessageMethod } from '../../interface/bluebubble.types';
 import { config } from '../../config';
+import { BBSendMessageMethod, BBMessage } from '../../interface/bluebubble/internal.types';
 
 const IMESSAGE_GUID_PREFIX = 'iMessage;-;';
 
@@ -11,11 +11,11 @@ export async function sendMessage({ address, message }: { address: string; messa
         chatGuid: `${IMESSAGE_GUID_PREFIX}${address}`,
         tempGuid: uuidv4(),
         message,
-        method: BBSentMessageMethod.PRIVATE_API,
+        method: BBSendMessageMethod.PRIVATE_API,
         subject: '',
         effectId: '',
         selectedMessageGuid: '',
-    } as BBSentMessage;
+    } as BBMessage;
 
     await axios
         .request({

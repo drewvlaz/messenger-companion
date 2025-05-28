@@ -12,6 +12,7 @@ const prettierConfig = {
     importOrder: [
         '^[./]', // Separate local imports into their own group.
     ],
+    // importOrder: ["^@core/(.*)$", "^@server/(.*)$", "^@ui/(.*)$", "^[./]"],
     importOrderSeparation: true, // Put blank lines between import groups.
     importOrderSortSpecifiers: true, // Not sure what this does.
 };

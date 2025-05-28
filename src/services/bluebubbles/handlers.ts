@@ -1,12 +1,8 @@
-import { DateTime } from 'luxon';
-import { ok } from 'assert';
-
 import { config } from '../../config';
-import { BBReceivedMessage } from '../../interface/bluebubble.types';
 import { MessageCommandType } from './types';
 import { sendMessage } from './api';
-import { prisma } from '../../db/config';
 import { handleAnalyzeMessage, handleAskQuestion } from './actions';
+import { BBMessageResponse } from '../../interface/bluebubble/raw.types';
 
 const parseCommand = (message: string) => {
     const [command, ...args] = message.split(' ');
@@ -62,41 +58,10 @@ const handleCommand = async ({
     }
 };
 
-const recordMessage = async (message: BBReceivedMessage) => {
-    const senderId = message.isFromMe ? config.env.SELF_ADDRESS! : message.handle?.address;
-    const recipientId = message.isFromMe ? message.handle?.address : config.env.SELF_ADDRESS!;
-    ok(senderId && recipientId);
-    await prisma.bbMessage.create({
-        data: {
-            // Identifiers
-            messageId: message.guid,
-            senderId,
-            recipientId,
-
-            // Message content
-            subject: message.subject,
-            text: message.text,
-
-            // Date metadata
-            dateCreated: DateTime.fromMillis(message.dateCreated).toISO()!,
-            dateDelivered: message.dateDelivered
-                ? DateTime.fromMillis(message.dateDelivered).toISO()!
-                : null,
-            dateEdited: message.dateEdited
-                ? DateTime.fromMillis(message.dateEdited).toISO()!
-                : null,
-            dateRetracted: message.dateRetracted
-                ? DateTime.fromMillis(message.dateRetracted).toISO()!
-                : null,
-        },
-    });
-};
-
-export const handleNewMessage = async (message: BBReceivedMessage) => {
+export const handleNewMessage = async (message: BBMessageResponse) => {
     if (!message.handle) {
         return;
     }
-    await recordMessage(message);
 
     console.log(`New message from ${message.handle.address}: ${message.text}`);
 
