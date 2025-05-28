@@ -49,7 +49,6 @@ const handleCommand = async ({
             await handleAskQuestion({
                 question: args,
                 userAddress: address,
-                recipientAddress,
             });
             break;
         case MessageCommandType.ANALYZE:
@@ -77,7 +76,7 @@ export const handleNewMessage = async (message: BBMessageResponse) => {
 
     const command = parseCommand(message.text);
     // Get the recipient address (usually the self address)
-    const recipientAddress = config.env.SELF_ADDRESS;
+    const recipientAddress = config.env.SELF_ADDRESS!;
 
     switch (message.handle.address) {
         // TODO: stop hardcoding these

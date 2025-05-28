@@ -5,11 +5,9 @@ import { sendMessage } from './api';
 export const handleAskQuestion = async ({
     question,
     userAddress,
-    recipientAddress,
 }: {
     question: string;
     userAddress: string;
-    recipientAddress: string;
 }) => {
     console.log('Question asked:', question);
 
