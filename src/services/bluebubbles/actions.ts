@@ -2,6 +2,13 @@ import { prisma } from '../../db/config';
 import { analyzeMessages, askQuestion, determineAnalysisType } from '../ai/anthropic';
 import { sendMessage } from './api';
 
+/**
+ * Handles the /ask command by sending the user's question to Claude AI
+ * and returning the response.
+ *
+ * @param question - The question text from the user
+ * @param userAddress - The phone number/address of the user to send the response to
+ */
 export const handleAskQuestion = async ({
     question,
     userAddress,
@@ -20,6 +27,17 @@ export const handleAskQuestion = async ({
     });
 };
 
+/**
+ * Handles the /analyze command by:
+ * 1. Determining the appropriate analysis type based on the user's message
+ * 2. Fetching recent messages from the conversation
+ * 3. Sending them to Claude AI for analysis
+ * 4. Returning the analysis results to the user
+ *
+ * @param message - The message text from the user (may contain analysis instructions)
+ * @param senderAddress - The phone number/address of the sender requesting analysis
+ * @param recipientAddress - The phone number/address of the recipient (usually the bot)
+ */
 export const handleAnalyzeMessage = async ({
     message,
     senderAddress,
