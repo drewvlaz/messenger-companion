@@ -46,17 +46,17 @@ const handleCommand = async ({
         case MessageCommandType.ASK:
             console.log('Asking:', args);
             // Process the ASK command here
-            await handleAskQuestion({ 
-                question: args, 
+            await handleAskQuestion({
+                question: args,
                 senderAddress: address,
-                recipientAddress 
+                recipientAddress,
             });
             break;
         case MessageCommandType.ANALYZE:
-            await handleAnalyzeMessage({ 
-                message: args, 
+            await handleAnalyzeMessage({
+                message: args,
                 senderAddress: address,
-                recipientAddress 
+                recipientAddress,
             });
             break;
         default:
@@ -84,10 +84,10 @@ export const handleNewMessage = async (message: BBMessageResponse) => {
         case config.env.JESSE_ADDRESS:
         case config.env.SELF_ADDRESS: {
             if (command) {
-                await handleCommand({ 
-                    ...command, 
+                await handleCommand({
+                    ...command,
                     address: message.handle.address,
-                    recipientAddress
+                    recipientAddress,
                 });
             }
             break;

@@ -31,7 +31,7 @@ export const handleAskQuestion = async ({
     } catch (error) {
         console.error('Error in handleAskQuestion:', error);
         await sendMessage({
-            address,
+            address: senderAddress,
             message: 'Sorry, I encountered an error while processing your question.',
         });
     }
@@ -62,8 +62,8 @@ export const handleAnalyzeMessage = async ({
                     {
                         senderId: recipientAddress,
                         recipientId: senderAddress,
-                    }
-                ]
+                    },
+                ],
             },
             orderBy: {
                 dateCreated: 'desc',
@@ -106,7 +106,7 @@ export const handleAnalyzeMessage = async ({
     } catch (error) {
         console.error('Error in handleAnalyzeMessage:', error);
         await sendMessage({
-            address,
+            address: senderAddress,
             message: 'Sorry, I encountered an error while analyzing your messages.',
         });
     }
