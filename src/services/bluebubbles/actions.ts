@@ -62,7 +62,7 @@ export const handleAnalyzeMessage = async ({
             dateCreated: true,
             senderId: true,
         },
-        take: 10,
+        take: 20,
     });
 
     if (previousMessages.length === 0) {
@@ -82,7 +82,7 @@ export const handleAnalyzeMessage = async ({
         previousMessages.map((msg) => ({
             text: msg.text,
             timestamp: msg.dateCreated,
-            author: msg.senderId === senderAddress ? 'User 1' : 'User 2',
+            author: msg.senderId, // TODO: use sender name instead of ID
         })),
         analysisType,
         message, // Pass the user's message as context
