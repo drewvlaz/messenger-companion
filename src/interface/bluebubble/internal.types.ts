@@ -2,6 +2,7 @@ import { BBMessageResponse } from './raw.types';
 
 export enum BBEventType {
     NEW_MESSAGE = 'new-message',
+    UPDATED_MESSAGE = 'updated-message',
     // TODO: add more event types
 }
 

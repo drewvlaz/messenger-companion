@@ -22,6 +22,7 @@ export const handleAskQuestion = async ({
     question: string;
     userAddress: string;
 }) => {
+    // TODO: unsend this messsage after the llm returns
     await sendMessage({
         address: userAddress,
         message: 'Thinking about your question... One moment please.',
@@ -52,6 +53,7 @@ export const handleAnalyzeMessage = async ({
     userAddress: string;
 }) => {
     // First, determine the appropriate analysis type based on the user's message
+    // TODO: unsend this messsage after the llm returns
     await sendMessage({
         address: userAddress,
         message: 'Determining the appropriate level of analysis...',
@@ -87,7 +89,7 @@ export const handleAnalyzeMessage = async ({
             dateCreated: true,
             senderId: true,
         },
-        take: 20,
+        take: 30,
     });
 
     if (previousMessages.length === 0) {

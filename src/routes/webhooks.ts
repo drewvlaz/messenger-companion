@@ -11,11 +11,13 @@ webhooks.post('/bluebubbles', (req: Request, res: Response, next: NextFunction) 
         const { type, data } = req.body as BBEvent;
         switch (type) {
             case BBEventType.NEW_MESSAGE:
+                // case BBEventType.UPDATED_MESSAGE:
                 handleNewMessage(data);
                 break;
             default:
                 console.log('Unknown event type');
                 res.sendStatus(400);
+                return;
         }
 
         res.sendStatus(200);
