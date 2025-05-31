@@ -13,7 +13,13 @@ const compat = new FlatCompat({
 });
 
 export default [
-    ...compat.extends('eslint:recommended', 'plugin:eslint-comments/recommended'),
+    ...compat.extends(
+        'eslint:recommended',
+        'plugin:eslint-comments/recommended',
+        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/recommended-requiring-type-checking',
+        'plugin:@typescript-eslint/strict',
+    ),
     {
         "rules": {
             "padding-line-between-statements": [

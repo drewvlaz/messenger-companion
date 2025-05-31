@@ -32,3 +32,12 @@ export interface MCPToolSchema {
     inputSchema: ZodRawShape;
     func: (args: { [x: string]: any }, extra: any) => Promise<MCPToolOutput>;
 }
+
+export enum MCPActionType {
+    TEXT = 'text',
+    SERVER_TOOL_USE = 'server_tool_use',
+    WEB_SEARCH_TOOL_RESULT = 'web_search_tool_result',
+    TOOL_USE = 'tool_use',
+    THINKING = 'thinking',
+    REDACTED_THINKING = 'redacted_thinking',
+}
