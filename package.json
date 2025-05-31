@@ -26,6 +26,7 @@
   "homepage": "https://github.com/drewvlaz/messenger-companion#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "@prisma/client": "6.8.2",
     "@types/node": "^22.15.24",
     "axios": "^1.9.0",
@@ -34,7 +35,8 @@
     "luxon": "^3.6.1",
     "node-typedstream": "^1.4.1",
     "prisma": "^6.8.2",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zod": "^3.25.42"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
